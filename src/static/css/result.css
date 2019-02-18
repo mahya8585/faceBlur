@@ -1,0 +1,31 @@
+body {
+    max-width: 1000px;
+    margin: auto;
+    background-color: #F8E0E6;
+    color: #DF013A;
+}
+
+h1 {
+    font-size: 48px;
+    text-align:center;
+}
+
+.full_display {
+    width: 100%;
+}
+.harf_display {
+    width: 50%;
+}
+.same_line {
+    float: left;
+}
+
+#submit {
+    margin: 30px;
+    padding: 15px 40px;
+    font-size: 1.2em;
+    background-color: #D63C41;
+    color: #fff;
+    border-style: none;
+}
+

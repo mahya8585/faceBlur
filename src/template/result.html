@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" content="text/html">
+    <link rel="stylesheet" type="text/css" href="{{ static_url('css/result.css') }}">
+    <title>Image Result</title>
+</head>
+<body>
+
+<div class="full_display">
+    <h1>I found faces!</h1>
+</div>
+<p>
+    <img src="{{ static_url('img/sakura.png') }}" class="full_display"/> <br/>
+</p>
+<p>
+    {% for img_name in result_names %}
+        {% block img_name %}
+            <img src="{{ static_url('img/result/' + img_name) }}" class="full_display"/>
+        {% end %}
+    {% end %}
+</p>
+
+{% autoescape None %}
+
+</body>
+</html>

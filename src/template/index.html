@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" content="text/html">
+    <link rel="stylesheet" type="text/css" href="{{ static_url('css/result.css') }}">
+    <title>Face Blur Photo Creator</title>
+</head>
+<body>
+<p>
+    <h1>★ Face Blur Photo Creator ★</h1>
+    <span>説明文を入れる</span>
+    <img src="{{ static_url('img/sakura.png') }}" class="full_display"/>
+</p>
+<form method="post" action="/creator" enctype="multipart/form-data">
+    <p>
+        {% for img_name in image_names %}
+            {% block img_name %}
+                <img src="{{ static_url('img/target/' + img_name) }}" class="harf_display same_line"/>
+            {% end %}
+        {% end %}
+    </p>
+
+    <p><input type="submit" value="go!" id="submit"/></p>
+</form>
+
+</body>
+</html>
