@@ -1,2 +1,5 @@
-src/__pycache__
 .idea
+
+src/__pycache__
+src/static/img/result
+src/static/img/target
