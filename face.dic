@@ -1,0 +1,19 @@
+{
+    'faceId': 'b080123d-95ef-4e88-8a02-d248b39c80b7',
+    'faceRectangle': {
+        'top': 820,
+        'left': 732,
+        'width': 207,
+        'height': 207
+    }
+},
+
+{
+    'faceId': '8ca00d01-9c24-4884-9025-e977d37c4050',
+    'faceRectangle': {
+        'top': 861,
+        'left': 1527,
+        'width': 206,
+        'height': 206
+    }
+}

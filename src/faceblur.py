@@ -4,39 +4,21 @@ import requests
 
 
 def create_blur_img(src_img, face_rectangle, blur_ratio):
-    """
-    ブラー効果を付与した画像を作成します
-    :param src_img: 元画像
-    :param face_rectangle: ブラー効果をかけたいエリアのtop, left, width, height のディクショナリ
-    :param blur_ratio: blur率(float)
-    :return:
-    """
     top = face_rectangle['top']
     left = face_rectangle['left']
 
-    # ブラー効果させたい部分を切り抜く
-    src_crop = src_img.crop((
-        left,
-        top,
-        left + face_rectangle['width'],
-        top + face_rectangle['height']
-    ))
+    # crop image(target face)
+    src_crop = src_img.crop((left, top, left + face_rectangle['width'], top + face_rectangle['height']))
 
-    # 切り抜いた画像をブラー化する
+    # blur for crop image
     crop_blur = src_crop.filter(ImageFilter.GaussianBlur(blur_ratio))
-    # 元画像にブラー化した画像を張り付ける
+    # overwrite
     src_img.paste(crop_blur, (left, top))
 
     return src_img
 
 
 def get_face_rectangle(img, key):
-    """
-    Azure Cognitive Service face APIを呼び出し、顔の位置を取得する
-    :param img: 対象の画像
-    :param key: face api の subscription key
-    :return:
-    """
     url = 'https://japaneast.api.cognitive.microsoft.com/face/v1.0/detect'
     header = {
         'Content-Type': 'application/octet-stream',
@@ -45,44 +27,40 @@ def get_face_rectangle(img, key):
 
     res = requests.post(url, headers=header, data=open(img, 'rb'))
     res_json = res.json()
+    print(res_json)
 
     return res_json
 
 
 def main():
-    """
-    ディレクトリ内すべての画像に処理をします
-    :return:
-    """
-    # 作業ベースディレクトリ
     base_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'static', 'img')
-    # モザイクをかけたい画像が入っているディレクトリ
+    # target image directory path
     img_dir = os.path.join(base_dir, 'target')
-    # モザイク加工済み画像が出力されるディレクトリ
+    # response image directory path
     output_dir = os.path.join(base_dir, 'result')
-    # Face API サブスクリプションkey
+    # Face API key
     face_key = 'xxxxxx'
-    # blur 効果のratio(float)
+    # blur ratio(float)
     ratio = 15.0
 
-    # モザイクをかけたい画像が入ってるディレクトリ内すべてのファイルに処理をします
+    # loop: all images
     for image in os.listdir(img_dir):
         if image == '__init__.py' or image == '.DS_Store':
             continue
 
-        # imageの取得
+        # get image
         img_path = os.path.join(img_dir, image)
         im = Image.open(img_path)
 
-        # 顔位置の特定
+        # send face api (get face rectangle etc.)
         rectangles = get_face_rectangle(img_path, face_key)
 
-        # blur処理(1枚に複数の顔があったら全部にblur処理かけるよ～）
+        # blur
         blur_img = im
         for rectangle in rectangles:
-            blur_img = create_blur_img(blur_img, rectangle['faceRectangle'], ratio)
+            blur_img = create_blur_img(blur_img, rectangle['faceRectangle'], 15.0)
 
-        # ファイルの書き出し
+        # write image
         blur_img.save(os.path.join(output_dir, image), quality=100)
 
 

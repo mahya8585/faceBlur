@@ -3,3 +3,6 @@
 src/__pycache__
 src/static/img/result
 src/static/img/target
+
+batch_src/result
+batch_src/target

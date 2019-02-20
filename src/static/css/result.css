@@ -10,6 +10,11 @@ h1 {
     text-align:center;
 }
 
+h2 {
+    font-size: 36px;
+    text-align:center;
+}
+
 .full_display {
     width: 100%;
 }
