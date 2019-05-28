@@ -5,42 +5,51 @@ import requests
 
 """
 顔にモザイクをかける処理 with faceAPI
+モザイクがかかっていてもメガネしている人を判別しよう
 """
 
 
-def create_blur_img(src_img, face_rectangle, blur_ratio):
+def create_blur_img_using_attr(src_img, face_rectangle, blur_ratio, face_attr):
     """ブラー効果を付与した画像を作成します
     :param src_img: 元画像
     :param face_rectangle: ブラー効果をかけたいエリアのtop, left, width, height のディクショナリ
     :param blur_ratio: blur率(float)
+    :param face_attr: 顔属性オブジェクト
     :return:
     """
     top = face_rectangle['top']
     left = face_rectangle['left']
+    width = face_rectangle['width']
+    height = face_rectangle['height']
 
     # ブラー効果させたい部分を切り抜く
-    src_crop = src_img.crop((
-        left,
-        top,
-        left + face_rectangle['width'],
-        top + face_rectangle['height']
-    ))
+    src_crop = src_img.crop((left, top, left + width, top + height))
+
+    # TODO メガネをしている場合は色付きblur, 素顔の人はノーマルblur
+    if face_attr['glasses'] != 'NoGlasses':
+        crop_color = Image.new('RGB', (face_rectangle['width'], face_rectangle['height']), (41, 115, 198))
+        crop = Image.blend(src_crop, crop_color, 0.5)
+        src_img.paste(crop, (left, top))
+
+    else:
+        crop = src_crop
 
     # 切り抜いた画像をブラー化する
-    crop_blur = src_crop.filter(ImageFilter.GaussianBlur(blur_ratio))
+    crop_blur = crop.filter(ImageFilter.GaussianBlur(blur_ratio))
     # 元画像にブラー化した画像を張り付ける
     src_img.paste(crop_blur, (left, top))
 
     return src_img
 
 
-def get_face_rectangle(img, key):
-    """Azure Cognitive Service face APIを呼び出し、顔の位置を取得する
+def get_face_rectangle_with_attr(img, key):
+    """Azure Cognitive Service face APIを呼び出し、顔の位置を取得する。FaceAttributeオブジェクトも取得する
     :param img: 対象の画像
     :param key: face api の subscription key
     :return:
     """
-    url = 'https://japaneast.api.cognitive.microsoft.com/face/v1.0/detect'
+    # TODO メガネ判定を利用する
+    url = 'https://japaneast.api.cognitive.microsoft.com/face/v1.0/detect?returnFaceAttributes=glasses'
     header = {
         'Content-Type': 'application/octet-stream',
         'Ocp-Apim-Subscription-Key': key
@@ -63,7 +72,7 @@ def main():
     # モザイク加工済み画像が出力されるディレクトリ
     output_dir = os.path.join(base_dir, 'result')
     # Face API サブスクリプションkey
-    face_key = 'd5d390774f4d45588fc7e1041a4d9a73'
+    face_key = 'xxxxx'
     # blur 効果のratio(float)
     ratio = 15.0
 
@@ -77,12 +86,13 @@ def main():
         im = Image.open(img_path)
 
         # 顔位置の特定
-        rectangles = get_face_rectangle(img_path, face_key)
+        rectangles = get_face_rectangle_with_attr(img_path, face_key)
+        print(rectangles)
 
         # blur処理(1枚に複数の顔があったら全部にblur処理かけるよ～）
         blur_img = im
         for rectangle in rectangles:
-            blur_img = create_blur_img(blur_img, rectangle['faceRectangle'], ratio)
+            blur_img = create_blur_img_using_attr(blur_img, rectangle['faceRectangle'], ratio, rectangle['faceAttributes'])
 
         # ファイルの書き出し
         blur_img.save(os.path.join(output_dir, image), quality=100)
